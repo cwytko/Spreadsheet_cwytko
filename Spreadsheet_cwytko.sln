@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spreadsheet_cwytko", "Spreadsheet_cwytko\Spreadsheet_cwytko.csproj", "{76BF4A71-7B38-494D-9B67-059F15B52498}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CptS322", "SpreadsheetEngine\CptS322.csproj", "{822F591F-54FB-4C55-9593-1D0A25553A5F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{76BF4A71-7B38-494D-9B67-059F15B52498}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76BF4A71-7B38-494D-9B67-059F15B52498}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76BF4A71-7B38-494D-9B67-059F15B52498}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76BF4A71-7B38-494D-9B67-059F15B52498}.Release|Any CPU.Build.0 = Release|Any CPU
+		{822F591F-54FB-4C55-9593-1D0A25553A5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{822F591F-54FB-4C55-9593-1D0A25553A5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{822F591F-54FB-4C55-9593-1D0A25553A5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{822F591F-54FB-4C55-9593-1D0A25553A5F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
