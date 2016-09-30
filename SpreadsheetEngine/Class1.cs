@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel;
-using System.Collections;
+using System.Collections.Generic;
+
 
 
 namespace CptS322
@@ -17,9 +14,24 @@ namespace CptS322
         protected string _text;
         protected string _value;
 
-        // Praise be to the Evan Olds
         // https://msdn.microsoft.com/en-us/library/ms743695(v=vs.110).aspx
         public event PropertyChangedEventHandler PropertyChanged;
+        public EventArgs e = null;
+        //public delegate void PropertyChangedEventHandler(Cell c, EventArgs e);
+
+        // I used the link below, copied/pasted the MSDN's version of
+        // OnPropertyChanged() and edited to the specs of this assignment
+        // https://msdn.microsoft.com/en-us/library/ms743695(v=vs.110).aspx
+
+        //public delegate void PropertyHandler(Cell c, EventArgs e);
+
+        protected void OnPropertyChanged(string desc)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(desc));
+            }
+        }
 
         // https://msdn.microsoft.com/en-us/library/acdd6hb7.aspx
         protected Cell(int RowIndex, int ColumnIndex)
@@ -65,19 +77,6 @@ namespace CptS322
 
         }
 
-        // I used the link below, copied/pasted the MSDN's version of
-        // OnPropertyChanged() and edited to the specs of this assignment
-        // https://msdn.microsoft.com/en-us/library/ms743695(v=vs.110).aspx
-
-        protected void OnPropertyChanged(string desc)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(desc));
-            }
-        }
-
         public int RowIndex
         {
             get
@@ -101,18 +100,21 @@ namespace CptS322
         int Row;
         int Col;
 
-        public SpreadsheetCell (int CurRow, int CurCol) : base (CurRow, CurCol)
+        public SpreadsheetCell(int CurRow, int CurCol) : base(CurRow, CurCol)
         {
             Row = CurRow;
             Col = CurCol;
         }
-    }
+}
 
 
-    public class Spreadsheet : SpreadsheetCell
+    public class Spreadsheet
     {
         // Lots of cells!
-        SpreadsheetCell[,] cell = new SpreadsheetCell[75, 75];
+        public SpreadsheetCell[,] cell;
+        public event PropertyChangedEventHandler PropertyChanged;
+        public delegate EventHandler(object source, EventArgs e);
+
         int CapacityRows, CapacityCols;
 
         public int ColumnCount()
@@ -125,16 +127,17 @@ namespace CptS322
             return CapacityRows;
         }
 
-        public SpreadsheetCell GetCell(int r, int c)
+        public Cell GetCell(int r, int c)
         {
-            if(r <= CapacityRows && c <= CapacityCols)
+            if (r <= CapacityRows && c <= CapacityCols)
                 return cell[r, c];
             return null;
         }
 
-        public Spreadsheet(int NumRows, int NumCols) : base(0, 0)
+        public Spreadsheet(int NumRows, int NumCols)
         {
             // We need to have Cells made new each time
+            cell = new SpreadsheetCell[NumRows, NumCols];
             CapacityRows = NumRows;
             CapacityCols = NumCols;
 
@@ -143,13 +146,28 @@ namespace CptS322
                 for (int j = 0; j < NumCols; j++)
                 {
                     cell[i, j] = new SpreadsheetCell(i, j);
+                   
                 }
             }
         }
 
-        public void CellPropertyChanged(object sender, EventArgs e)
+        void CellPropertyChanged(string NText)
         {
-            OnPropertyChanged(_text);
+            if(PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(NText));
+            }
+        }
+
+        private void Acknowledged(object c, EventArgs e)
+        {
+
+        }
+
+        public void testPropChanged()
+        {
+            this.cell[5, 5].Text = 33.ToString();
+            //[5, 5].Text = 33.ToString();
         }
     }
 
