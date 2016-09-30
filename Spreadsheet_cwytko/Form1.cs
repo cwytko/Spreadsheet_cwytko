@@ -48,14 +48,7 @@ namespace Spreadsheet_cwytko
                 CellDataGridView.Rows[r].HeaderCell.Value = (r + 1).ToString();
             }
 
-            //for (int i = 0; i < 50; i++)
-            //{
-            //    CellDataGridView.Rows.Add();
-            //    CellDataGridView.Rows[i].HeaderCell.Value = (i + 1).ToString();
-
-            //}
-
-
+            
             InitializeCellDataGridView();
         }
 

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 namespace CptS322
 {
+    public delegate void MyDelegate();
+
     public abstract class Cell : INotifyPropertyChanged
     {
         // Variables yo
@@ -15,6 +17,10 @@ namespace CptS322
         protected string _value;
 
         // https://msdn.microsoft.com/en-us/library/ms743695(v=vs.110).aspx
+        // An attempted replication of https://msdn.microsoft.com/en-us/library/8627sbea(v=vs.71).aspx
+        
+        event MyDelegate MyEvent;
+
         public event PropertyChangedEventHandler PropertyChanged;
         public EventArgs e = null;
         //public delegate void PropertyChangedEventHandler(Cell c, EventArgs e);
@@ -54,17 +60,6 @@ namespace CptS322
             {
                 return _text;
             }
-            /*
-             * The big hint for this: It’s a protected property which means
-             * inheriting classes can see it. Inheriting classes should NOT
-             * be publically exposed to code outside the class library. 
-             * 
-             * I'm not sure if I'm doing the protection correct in this
-             * sense.
-             * 
-             * Clarification for myself
-             * https://msdn.microsoft.com/en-us/library/a1khb4f8.aspx
-             */
             set
             {
                 if (value == _text)
@@ -97,6 +92,9 @@ namespace CptS322
     // Intermediary step
     public class SpreadsheetCell : Cell
     {
+        public event MyDelegate MyEvent;
+        public event PropertyChangedEventHandler PropertyChanged;
+
         int Row;
         int Col;
 
@@ -105,7 +103,21 @@ namespace CptS322
             Row = CurRow;
             Col = CurCol;
         }
-}
+
+        public void test()
+        {
+            if (MyEvent != null)
+                MyEvent();
+        }
+
+        protected void OnPropertyChanged(string desc)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(desc));
+            }
+        }
+    }
 
 
     public class Spreadsheet
@@ -113,7 +125,8 @@ namespace CptS322
         // Lots of cells!
         public SpreadsheetCell[,] cell;
         public event PropertyChangedEventHandler PropertyChanged;
-        public delegate EventHandler(object source, EventArgs e);
+        //public delegate void EventHandler(object source, EventArgs e);
+        //EventHandler ;
 
         int CapacityRows, CapacityCols;
 
@@ -134,6 +147,11 @@ namespace CptS322
             return null;
         }
 
+        private void f()
+        {
+            //
+        }
+
         public Spreadsheet(int NumRows, int NumCols)
         {
             // We need to have Cells made new each time
@@ -146,18 +164,14 @@ namespace CptS322
                 for (int j = 0; j < NumCols; j++)
                 {
                     cell[i, j] = new SpreadsheetCell(i, j);
-                   
+                    // So close
+                    cell[i, j].MyEvent += new MyDelegate(f);
                 }
             }
+
+            cell[4, 4].test();
         }
 
-        void CellPropertyChanged(string NText)
-        {
-            if(PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(NText));
-            }
-        }
 
         private void Acknowledged(object c, EventArgs e)
         {
