@@ -2,34 +2,23 @@
 using System.ComponentModel;
 using System.Collections.Generic;
 
-
-
 namespace CptS322
 {
-    public delegate void MyDelegate();
-
     public abstract class Cell : INotifyPropertyChanged
     {
         // Variables yo
         readonly int _rowIndex;
         readonly int _columnIndex;
-        protected string _text;
-        protected string _value;
+        private string _text;
+        private string _value;
 
         // https://msdn.microsoft.com/en-us/library/ms743695(v=vs.110).aspx
-        // An attempted replication of https://msdn.microsoft.com/en-us/library/8627sbea(v=vs.71).aspx
-        
-        event MyDelegate MyEvent;
-
         public event PropertyChangedEventHandler PropertyChanged;
         public EventArgs e = null;
-        //public delegate void PropertyChangedEventHandler(Cell c, EventArgs e);
 
         // I used the link below, copied/pasted the MSDN's version of
         // OnPropertyChanged() and edited to the specs of this assignment
         // https://msdn.microsoft.com/en-us/library/ms743695(v=vs.110).aspx
-
-        //public delegate void PropertyHandler(Cell c, EventArgs e);
 
         protected void OnPropertyChanged(string desc)
         {
@@ -46,15 +35,16 @@ namespace CptS322
             _columnIndex = ColumnIndex;
         }
 
-        public string Value
+        protected string Value
         {
             get
             {
                 return _value;
             }
+            
         }
 
-        public string Text
+        protected string Text
         {
             get
             {
@@ -64,6 +54,7 @@ namespace CptS322
             {
                 if (value == _text)
                     return;
+                else if ()
 
                 _text = value;
                 // Fire the event of the edit
@@ -89,12 +80,10 @@ namespace CptS322
         }
     }
 
+    // Edification purposes
     // Intermediary step
     public class SpreadsheetCell : Cell
     {
-        public event MyDelegate MyEvent;
-        public event PropertyChangedEventHandler PropertyChanged;
-
         int Row;
         int Col;
 
@@ -104,31 +93,27 @@ namespace CptS322
             Col = CurCol;
         }
 
-        public void test()
+        // Hopefully this isn't viewed as circumventing the protections
+        public string ReturnText()
         {
-            if (MyEvent != null)
-                MyEvent();
+            return Text;
         }
 
-        protected void OnPropertyChanged(string desc)
+        public void SetText(string n)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(desc));
-            }
+            Text = n;
         }
+
     }
 
 
-    public class Spreadsheet
+    public class Spreadsheet : SpreadsheetCell
     {
+
         // Lots of cells!
         public SpreadsheetCell[,] cell;
-        public event PropertyChangedEventHandler PropertyChanged;
-        //public delegate void EventHandler(object source, EventArgs e);
-        //EventHandler ;
-
         int CapacityRows, CapacityCols;
+        /*********************************************************************/
 
         public int ColumnCount()
         {
@@ -147,12 +132,7 @@ namespace CptS322
             return null;
         }
 
-        private void f()
-        {
-            //
-        }
-
-        public Spreadsheet(int NumRows, int NumCols)
+        public Spreadsheet(int NumRows, int NumCols) : base(NumRows, NumCols)
         {
             // We need to have Cells made new each time
             cell = new SpreadsheetCell[NumRows, NumCols];
@@ -164,24 +144,23 @@ namespace CptS322
                 for (int j = 0; j < NumCols; j++)
                 {
                     cell[i, j] = new SpreadsheetCell(i, j);
-                    // So close
-                    cell[i, j].MyEvent += new MyDelegate(f);
+                    cell[i, j].PropertyChanged += new PropertyChangedEventHandler(Spreadsheet_PropertyChanged);
                 }
             }
-
-            cell[4, 4].test();
         }
 
-
-        private void Acknowledged(object c, EventArgs e)
+        private void Spreadsheet_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
 
         }
 
         public void testPropChanged()
         {
-            this.cell[5, 5].Text = 33.ToString();
-            //[5, 5].Text = 33.ToString();
+            Random col = new Random(), row = new Random();
+            for (int i = 0; i < 50; i++)
+            {
+                cell[(row.Next() % 50), (col.Next() % 26)].SetText("Pickle");
+            }
         }
     }
 

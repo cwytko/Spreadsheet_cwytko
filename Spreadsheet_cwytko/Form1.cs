@@ -21,6 +21,7 @@ namespace Spreadsheet_cwytko
 
         public Form1()
         {
+            
             CellDataGridView.Dock = DockStyle.Fill;
             this.Controls.Add(CellDataGridView);
             char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
@@ -32,24 +33,32 @@ namespace Spreadsheet_cwytko
                 CellDataGridView.Columns.Add(c.ToString(), c.ToString());
             }
 
-
+            CellBindingSource.DataSource = test;
             // http://stackoverflow.com/questions/29633018/show-2d-array-in-datagridview
+            int col = 0;
             for (int r = 0; r < 50; r++)
             {
                 DataGridViewRow row = new DataGridViewRow();
                 row.CreateCells(this.CellDataGridView);
 
-                for (int c = 0; c < 26; c++)
+                for (col = 0; col < 26; col++)
                 {
-                    row.Cells[c].Value = test.cell[r, c].Text;
+                    
+                    CellDataGridView[col, r].Value = ((CptS322.Spreadsheet)CellBindingSource.DataSource).cell[r, col];
+                    // THIS part took for freaking ever yo, I'm a potato
+                    ((CptS322.Spreadsheet)CellBindingSource.DataSource).cell[r, col].PropertyChanged += new PropertyChangedEventHandler(Form1_PropertyChanged);
                 }
 
                 this.CellDataGridView.Rows.Add(row);
                 CellDataGridView.Rows[r].HeaderCell.Value = (r + 1).ToString();
             }
 
-            
             InitializeCellDataGridView();
+        }
+
+        private void Form1_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            CellDataGridView[(sender as CptS322.SpreadsheetCell).ColumnIndex, (sender as CptS322.SpreadsheetCell).RowIndex].Value = (sender as CptS322.SpreadsheetCell).ReturnText();
         }
 
         private void InitializeCellDataGridView()
@@ -57,28 +66,13 @@ namespace Spreadsheet_cwytko
             CellDataGridView.Dock = DockStyle.Fill;
             CellDataGridView.AllowUserToAddRows = false;
             CellDataGridView.AllowUserToDeleteRows = false;
-
-
-            // https://msdn.microsoft.com/en-us/library/system.windows.forms.datagridview.datasource%28v=vs.110%29.aspx
-            // BIND the Data layer to the DATA SOURCE
-            //CellBindingSource.DataSource = ;
-
-            // https://msdn.microsoft.com/en-us/library/system.windows.forms.datagridview.datasource%28v=vs.110%29.aspx
-            // BIND THE DATA SOURCE
-            //CellDataGridView.DataSource = CellBindingSource;
-
-            //CellDataGridView.Rows[5].Cells[5].Value = 10;
+            
             test.testPropChanged();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
  
-        }
-
-        private void Test_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
