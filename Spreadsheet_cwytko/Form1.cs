@@ -15,6 +15,7 @@ namespace Spreadsheet_cwytko
 
     public partial class Form1 : Form
     {
+        //private Button Demo = new Button();
         private BindingSource CellBindingSource = new BindingSource();
         private DataGridView CellDataGridView = new DataGridView();
         CptS322.Spreadsheet test = new CptS322.Spreadsheet(50, 26);
@@ -58,7 +59,7 @@ namespace Spreadsheet_cwytko
 
         private void Form1_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            CellDataGridView[(sender as CptS322.SpreadsheetCell).ColumnIndex, (sender as CptS322.SpreadsheetCell).RowIndex].Value = (sender as CptS322.SpreadsheetCell).ReturnText();
+            CellDataGridView[(sender as CptS322.SpreadsheetCell).ColumnIndex, (sender as CptS322.SpreadsheetCell).RowIndex].Value = (sender as CptS322.SpreadsheetCell).ReturnValue();
         }
 
         private void InitializeCellDataGridView()
@@ -66,13 +67,6 @@ namespace Spreadsheet_cwytko
             CellDataGridView.Dock = DockStyle.Fill;
             CellDataGridView.AllowUserToAddRows = false;
             CellDataGridView.AllowUserToDeleteRows = false;
-            
-            test.testPropChanged();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
- 
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -88,6 +82,11 @@ namespace Spreadsheet_cwytko
         private void Form1_Load_1(object sender, EventArgs e)
         {
 
+        }
+
+        private void Demo_Click(object sender, EventArgs e)
+        {
+            test.testPropChanged();
         }
     }
 }
