@@ -57,7 +57,9 @@ namespace CptS322
                 else
                 {
                     _text = value;
-                    _value = value;
+                    // Can't have this anymore unless the text does not have 
+                    // an '='
+                   // _value = value;
                 }
                 // Fire the event of the edit
                 OnPropertyChanged("Text");
@@ -106,11 +108,6 @@ namespace CptS322
             Text = n;
         }
 
-        //public void SetText(string n, ...)
-        //{
-        //    Text = n;
-        //}
-
         public string ReturnValue()
         {
             return Value;
@@ -124,23 +121,21 @@ namespace CptS322
         // Lots of cells!
         public SpreadsheetCell[,] cell;
         int CapacityRows, CapacityCols;
-        /*********************************************************************/
 
-        public int ColumnCount()
-        {
-            return CapacityCols;
-        }
+        public int ColumnCount() { return CapacityCols; }
 
-        public int RowCount()
-        {
-            return CapacityRows;
-        }
+        public int RowCount() { return CapacityRows; }
 
         public Cell GetCell(int r, int c)
         {
             if (r <= CapacityRows && c <= CapacityCols)
                 return cell[r, c];
             return null;
+        }
+
+        public void SetValue(Cell change)
+        {
+            
         }
 
         public Spreadsheet(int NumRows, int NumCols) : base(NumRows, NumCols)
@@ -167,7 +162,7 @@ namespace CptS322
             {
                 // Set the text of a value of another box
                 cell[(sender as SpreadsheetCell).RowIndex, (sender as SpreadsheetCell).ColumnIndex].SetText(cell[int.Parse((sender as SpreadsheetCell).ReturnText().Substring(2)), Convert.ToInt32((sender as SpreadsheetCell).ReturnText()[1]) - 65].ReturnText());
-               // cell[int.Parse((sender as SpreadsheetCell).ReturnText().Substring(2)), Convert.ToInt32((sender as SpreadsheetCell).ReturnText()[1]) - 65].SetText((sender as SpreadsheetCell).ReturnText());
+                //cell[(sender as SpreadsheetCell).RowIndex, (sender as SpreadsheetCell).ColumnIndex].SetText();
             }
         }
 
@@ -189,140 +184,166 @@ namespace CptS322
         }
     }
 
-    class Node
+    // I found it Logan 
+    // THE KRABBY PATTY FORMULA
+    // This clarified so much for building the 'false' bottom
+    // stack for operator precedence
+    // https://www.seas.gwu.edu/~csci131/fall96/exp_to_tree.html
+    //
+    public class Node { }
+
+
+    public class ConstNode : Node
     {
-        double Eval() { return 0; }
-    }
-    class constNode : Node
-    {
-        public double value;
-        public constNode(double assign)
-        {
-            value = assign;
-        }
-        double Eval() { return value; }
+        public ConstNode(double newVal)
+        { val = newVal; }
+
+        public double val;
     }
 
-    // Will this rely on the existence on an ExpTree object in order to see
-    // variables and their associated value?
-    class VarNode : Node
+    public class VarNode : Node
     {
+
+        public VarNode(string newName) { Name = newName; }
+
         public string Name;
-        public VarNode(string expression)
-        {
-            Name = expression;
-        }
-        // reference the variable from the ExpTree class
-        //private Dictionary<string, double> m_vars;
-        //public double Eval()
-        //{
-        //    return ExpTree.GetVarValue(Name);
-        //}
     }
-    class OpNode : Node
+
+    public class OpNode : Node
     {
-        public OpNode(char NewOp)
+        public OpNode(char newOp)
         {
-            Op = NewOp;
+            Op = newOp;
+            Left = null; Right = null;
         }
 
-        public char Op;
+        private char Op;
+
+        public char OP
+        {
+            get
+            { return Op; }
+            set { }
+        }
         public Node Left, Right;
     }
 
+
     public class ExpTree
     {
+        public Node root = new Node();
+        Stack<Node> wood = new Stack<Node>();
+        Stack<OpNode> joints = new Stack<OpNode>();
+        Dictionary<string, double> m_vars = new Dictionary<string, double>();
 
-        // force VarNodes to grab the double value from this dictionary
-        private Dictionary<string, double> m_vars = new Dictionary<string, double>();
 
         public double GetVarValue(string name)
         {
             return m_vars[name];
         }
 
-        void SetVar(string varName, double varValue)
+        public void SetVar(string varName, double varValue)
         {
             m_vars[varName] = varValue;
         }
 
-        // this will hold either the 'last to be evaluated' operator of the 
-        // expression or a single variable OR single value
-        private Node m_root;
-       
-
-        ExpTree(string expression_yo)
+        int Precedence(char op)
         {
-            m_root = Compile(expression_yo);
+            if (op == '/' || op == '*')
+                return 1;
+            return 0;
         }
 
-        // This function builds the node tree
-        Node Compile(string exp)
+        // This helper function is so fucking cool
+        public void LinkBranches()
         {
-            int index = GetOpIndex(exp);
-            if (-1 == index)
-                return BuildSimple(exp);
-            OpNode root = new OpNode(exp[index]);
-            root.Left = Compile(exp.Substring(0, index));
-            root.Right = Compile(exp.Substring(index + 1));
-            return root;
+            OpNode branch = new OpNode(joints.Pop().OP);
+            branch.Right = wood.Pop();
+            branch.Left = wood.Pop();
+            wood.Push(branch);
         }
 
-        // We reach this function when we have encountered no more operators
-        // There is only a variable or constant left
-        // This will determine if the leaf is a constant or a var
-        private Node BuildSimple(string exp)
+        public void Compile(string exp)
         {
-            double num = 0;
-            if (double.TryParse(exp, out num))
-                return new constNode(num);
-            // During the construction of this VarNode I need to populate the 
-            // dictionary with the exp as the Name, how do I know if the Name
-            // has a value association?
-            return new VarNode(exp);
-        }
-
-        // This will return an operator's index location within a given string
-        private int GetOpIndex(string exp)
-        {
-            // Parenthesis count (will determine precedence of execution
-            int pCount = 0;
-
-            for(int i = exp.Length - 1; i > 0; i--)
+            for (int i = 0; i < exp.Length; i++)
             {
-                // By placing the '+' and the '-' first we take care of 
-                // precedence issues on solving multiplication first
-                if ((exp[i] == '+' || exp[i] == '-') && pCount == 0)
-                    return i;
-                else if (exp[i] == ')')
-                    pCount++;
-                else if (exp[i] == '(')
-                    pCount--;
-                else if ((exp[i] == '*' || exp[i] == '/') && pCount == 0)
-                    return i;
+                switch (exp[i])
+                {
+                    case ' ':
+                        // Ignore whitespace
+                        break;
+                    case '(':
+                        joints.Push(new OpNode(exp[i]));
+                        break;
+                    case ')':
+                        while (joints.Peek().OP != '(')
+                            LinkBranches();
+                        // Get rid of '('
+                        joints.Pop();
+                        break;
+                    case '+':
+                    case '-':
+                    case '*':
+                    case '/':
+                        if (joints.Count == 0)
+                            joints.Push(new OpNode(exp[i]));
+                        else if (joints.Peek().OP == '(')
+                            joints.Push(new OpNode(exp[i]));
+                        else if (Precedence(joints.Peek().OP) < Precedence(exp[i]))
+                            joints.Push(new OpNode(exp[i]));
+                        else
+                        {
+                            do
+                            {
+                                LinkBranches();
+                            } while (joints.Count > 0 && joints.Peek().OP == '(' &&
+                            Precedence(joints.Peek().OP) < Precedence(exp[i]));
+                            joints.Push(new OpNode(exp[i]));
+                        }
+                        break;
+                    default:
+                        int j = i;
+                        for (; j < exp.Length; j++)
+                        {
+                            if (exp[j] == '*' || exp[j] == '+' || exp[j] == '/' || exp[j] == '-' || exp[j] == '(' || exp[j] == ')' || exp[j] == ' ')
+                                break;
+                        }
+                        int chosen = 0;
+                        if (Int32.TryParse(exp.Substring(i, (j - i)), out chosen))
+                            wood.Push(new ConstNode(chosen));
+                        else
+                        {
+                            wood.Push(new VarNode(exp.Substring(i, (j - i))));
+                            SetVar(exp.Substring(i, (j - i)), 0);
+                        }
+                        i = j - 1;
+                        break;
+                }
             }
-            return -1;
+            while (joints.Count > 0)
+                LinkBranches();
+
+            // There is only one 'branch' left in wood, but everything is attached to it
+            // DA Groot
+            root = wood.Pop();
         }
 
-        // This will render the tree
-        // Here's an example on how the tree can be read 
-        // http://cs.nyu.edu/courses/fall11/CSCI-GA.1133-001/rct257_files/Expression_Trees.pdf
         double resolve(Node traverse)
         {
             double evaluation = 0;
-            if (traverse is constNode)
-                return (traverse as constNode).value;
+
+            if (traverse is ConstNode)
+                return (traverse as ConstNode).val;
             else if (traverse is VarNode)
                 return m_vars[(traverse as VarNode).Name];
-            // The only other thing traverse could be would be an OpNode
             else
             {
-                OpNode on = (traverse as OpNode);
-                if (on.Op == '+')
+                OpNode on = traverse as OpNode;
+                if (on.OP == '+')
                     evaluation += resolve(on.Left) + resolve(on.Right);
-                else if (on.Op == '-')
+                else if (on.OP == '-')
                     evaluation += resolve(on.Left) - resolve(on.Right);
-                else if (on.Op == '*')
+                else if (on.OP == '*')
                     evaluation += resolve(on.Left) * resolve(on.Right);
                 else
                     evaluation += resolve(on.Left) / resolve(on.Right);
@@ -330,12 +351,9 @@ namespace CptS322
             return evaluation;
         }
 
-        double Eval()
+        public double Eval()
         {
-            double evaluation = 0;
-
-            evaluation = resolve(m_root);
-
+            double evaluation = resolve(root);
             return evaluation;
         }
     }
