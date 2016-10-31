@@ -14,7 +14,7 @@ namespace CptS322
 
         // https://msdn.microsoft.com/en-us/library/ms743695(v=vs.110).aspx
         public event PropertyChangedEventHandler PropertyChanged;
-        public EventArgs e = null;
+        //public EventArgs e = null;
 
         // I used the link below, copied/pasted the MSDN's version of
         // OnPropertyChanged() and edited to the specs of this assignment
@@ -56,10 +56,13 @@ namespace CptS322
                     return;
                 else
                 {
-                    _text = value;
+
+                    //_text = value;
+                    _text = String.Copy(value);
                     // Can't have this anymore unless the text does not have 
-                    // an '='
-                   // _value = value;
+                    // an '
+                    //_value = value;
+                    _value = String.Copy(value);
                 }
                 // Fire the event of the edit
                 OnPropertyChanged("Text");
@@ -105,7 +108,7 @@ namespace CptS322
 
         public void SetText(string n)
         {
-            Text = n;
+            Text = String.Copy(n);
         }
 
         public string ReturnValue()
@@ -151,6 +154,7 @@ namespace CptS322
                 {
                     cell[i, j] = new SpreadsheetCell(i, j);
                     cell[i, j].PropertyChanged += new PropertyChangedEventHandler(Spreadsheet_PropertyChanged);
+                    cell[i, j].SetText("Dicks");
                 }
             }
         }
@@ -161,7 +165,13 @@ namespace CptS322
             if ((sender as SpreadsheetCell).ReturnText().StartsWith("="))
             {
                 // Set the text of a value of another box
-                cell[(sender as SpreadsheetCell).RowIndex, (sender as SpreadsheetCell).ColumnIndex].SetText(cell[int.Parse((sender as SpreadsheetCell).ReturnText().Substring(2)), Convert.ToInt32((sender as SpreadsheetCell).ReturnText()[1]) - 65].ReturnText());
+                int r = (sender as SpreadsheetCell).RowIndex;
+                int c = (sender as SpreadsheetCell).ColumnIndex;
+
+                int y = int.Parse((sender as SpreadsheetCell).ReturnText().Substring(2));
+                int z = Convert.ToInt32((sender as SpreadsheetCell).ReturnText()[1]) - 65;
+
+                cell[r, c].SetText(cell[y, z].ReturnText());
                 //cell[(sender as SpreadsheetCell).RowIndex, (sender as SpreadsheetCell).ColumnIndex].SetText();
             }
         }
@@ -175,12 +185,12 @@ namespace CptS322
             }
             for (int i = 0; i < 50; i++)
             {
-                string thing = String.Format("This is cell B{0}", i);
-               string thing2 = String.Format("=B{0}", i);
+                string thing = String.Copy(String.Format("This is cell B{0}", i));
+               string thing2 = String.Copy(String.Format("=B{0}", i));
                 cell[i, 1].SetText(thing);
                 cell[i, 0].SetText(thing2);
-            }                        
-            
+            }
+
         }
     }
 
@@ -191,7 +201,6 @@ namespace CptS322
     // https://www.seas.gwu.edu/~csci131/fall96/exp_to_tree.html
     //
     public class Node { }
-
 
     public class ConstNode : Node
     {
@@ -227,7 +236,6 @@ namespace CptS322
         }
         public Node Left, Right;
     }
-
 
     public class ExpTree
     {

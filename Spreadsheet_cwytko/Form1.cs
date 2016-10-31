@@ -17,7 +17,11 @@ namespace Spreadsheet_cwytko
     {
         //private Button Demo = new Button();
         private BindingSource CellBindingSource = new BindingSource();
+        // this is the UI Layer of the Spreadsheet, where the user enters the
+        // formulas and can edit them
         private DataGridView CellDataGridView = new DataGridView();
+        // this is the Data Layer of the Spreadsheet, where the evaluations are
+        // stored
         CptS322.Spreadsheet test = new CptS322.Spreadsheet(50, 26);
 
         public Form1()
@@ -44,10 +48,14 @@ namespace Spreadsheet_cwytko
 
                 for (col = 0; col < 26; col++)
                 {
-                    
+
+                    //CellDataGridView[col, r].DataGridView.CellContentClick += DataGridView_CellContentClick;
+                    CellDataGridView[col, r].DataGridView.CellEndEdit += DataGridView_CellEndEdit;
+                    CellDataGridView[col, r].DataGridView.CellBeginEdit += DataGridView_CellBeginEdit;
                     CellDataGridView[col, r].Value = ((CptS322.Spreadsheet)CellBindingSource.DataSource).cell[r, col];
                     // THIS part took for freaking ever yo, I'm a potato
                     ((CptS322.Spreadsheet)CellBindingSource.DataSource).cell[r, col].PropertyChanged += new PropertyChangedEventHandler(Form1_PropertyChanged);
+
                 }
 
                 this.CellDataGridView.Rows.Add(row);
@@ -57,9 +65,18 @@ namespace Spreadsheet_cwytko
             InitializeCellDataGridView();
         }
 
+        // If there was previous text within this sender's text present it so 
+        // the user on CellContent Click...
+        private void DataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            string msg = String.Format("Editing Cell at ({0}, {1}) {2}",
+                e.ColumnIndex, e.RowIndex, test.cell[e.ColumnIndex, e.RowIndex].ReturnText());
+            this.Text = msg;
+        }
+
         private void Form1_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            CellDataGridView[(sender as CptS322.SpreadsheetCell).ColumnIndex, (sender as CptS322.SpreadsheetCell).RowIndex].Value = (sender as CptS322.SpreadsheetCell).ReturnValue();
+            CellDataGridView[(sender as CptS322.SpreadsheetCell).ColumnIndex, (sender as CptS322.SpreadsheetCell).RowIndex].Value = (sender as CptS322.SpreadsheetCell).ReturnText();
         }
 
         private void InitializeCellDataGridView()
@@ -69,14 +86,12 @@ namespace Spreadsheet_cwytko
             CellDataGridView.AllowUserToDeleteRows = false;
         }
 
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DataGridView_CellEndEdit(object sender,
+            DataGridViewCellEventArgs e)
         {
-
-        }
-
-        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-            //dataGridView1.Rows
+            string msg = String.Format("Finished Editing Cell at ({0}, {1} {2})",
+                e.ColumnIndex, e.RowIndex, test.cell[e.ColumnIndex, e.RowIndex].ReturnText());
+            this.Text = msg;
         }
 
         private void Form1_Load_1(object sender, EventArgs e)
@@ -87,6 +102,11 @@ namespace Spreadsheet_cwytko
         private void Demo_Click(object sender, EventArgs e)
         {
             test.testPropChanged();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }
