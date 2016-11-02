@@ -154,41 +154,56 @@ namespace CptS322
                 {
                     cell[i, j] = new SpreadsheetCell(i, j);
                     cell[i, j].PropertyChanged += new PropertyChangedEventHandler(Spreadsheet_PropertyChanged);
-                    cell[i, j].SetText("Dicks");
+                    cell[i, j].SetText("test");
                 }
             }
         }
 
         private void Spreadsheet_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            int r = (sender as SpreadsheetCell).RowIndex;
+            int c = (sender as SpreadsheetCell).ColumnIndex;
 
             if ((sender as SpreadsheetCell).ReturnText().StartsWith("="))
             {
                 // Set the text of a value of another box
-                int r = (sender as SpreadsheetCell).RowIndex;
-                int c = (sender as SpreadsheetCell).ColumnIndex;
+
 
                 int y = int.Parse((sender as SpreadsheetCell).ReturnText().Substring(2));
                 int z = Convert.ToInt32((sender as SpreadsheetCell).ReturnText()[1]) - 65;
 
-                cell[r, c].SetText(cell[y, z].ReturnText());
+                cell[r, c].SetText(cell[z, y].ReturnText());
                 //cell[(sender as SpreadsheetCell).RowIndex, (sender as SpreadsheetCell).ColumnIndex].SetText();
             }
+            //    else
+            //    {
+            //        (sender as SpreadsheetCell).ReturnText();
+            //        cell[r, c].SetText("no");   
+            //    }
         }
 
         public void testPropChanged()
         {
+
+            string thing = string.Empty;
+            string thing2 = (string.Empty);
+
             Random col = new Random(), row = new Random();
             for (int i = 0; i < 50; i++)
             {
-                cell[(row.Next() % 50), (col.Next() % 26)].SetText("Pickle");
+                cell[(col.Next() % 26), (row.Next() % 50)].SetText("Pickle");
             }
             for (int i = 0; i < 50; i++)
             {
-                string thing = String.Copy(String.Format("This is cell B{0}", i));
-               string thing2 = String.Copy(String.Format("=B{0}", i));
-                cell[i, 1].SetText(thing);
-                cell[i, 0].SetText(thing2);
+                thing = string.Copy(string.Format("This is cell B{0}", i));
+
+                cell[1, i].SetText(thing);
+            }
+
+            for (int i = 0; i < 50; i++)
+            {
+                thing2 = string.Copy(string.Format("=B{0}", i));
+                cell[0, i].SetText(thing2);
             }
 
         }
