@@ -51,9 +51,10 @@ namespace Spreadsheet_cwytko
 
                     //CellDataGridView[col, r].DataGridView.CellContentClick += DataGridView_CellContentClick;
                     CellDataGridView[col, r].DataGridView.CellEndEdit += DataGridView_CellEndEdit;
+                    //CellDataGridView[col, r].DataGridView.Valu
                     CellDataGridView[col, r].DataGridView.CellBeginEdit += DataGridView_CellBeginEdit;
-                    CellDataGridView[col, r].Value = ((CptS322.Spreadsheet)CellBindingSource.DataSource).cell[col, r];
                     // THIS part took for freaking ever yo, I'm a potato
+                    // It seems awfully sloppy but it will be pasta for now
                     ((CptS322.Spreadsheet)CellBindingSource.DataSource).cell[col, r].PropertyChanged += new PropertyChangedEventHandler(Form1_PropertyChanged);
 
                 }
@@ -69,16 +70,21 @@ namespace Spreadsheet_cwytko
         // the user on CellContent Click...
         private void DataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
-            string msg = String.Format("Editing Cell at ({0}, {1}) {2}",
+            string msg = String.Format("Editing Cell at ({0}, {1}): {2}",
                 e.ColumnIndex, e.RowIndex, test.cell[e.ColumnIndex, e.RowIndex].ReturnText());
             this.Text = msg;
+            if(test.cell[e.ColumnIndex, e.RowIndex].ReturnText() != null)
+                CellDataGridView[e.ColumnIndex, e.RowIndex].Value = test.cell[e.ColumnIndex, e.RowIndex].ReturnText();
         }
 
         private void Form1_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             int r = (sender as CptS322.SpreadsheetCell).ColumnIndex;
             int c = (sender as CptS322.SpreadsheetCell).RowIndex;
-            CellDataGridView[c, r].Value = (sender as CptS322.SpreadsheetCell).ReturnText();
+            if ((sender as CptS322.SpreadsheetCell).ReturnText().StartsWith("="))
+                CellDataGridView[c, r].Value = (sender as CptS322.SpreadsheetCell).ReturnValue();
+            else
+                CellDataGridView[c, r].Value = (sender as CptS322.SpreadsheetCell).ReturnText();
         }
 
         private void InitializeCellDataGridView()
@@ -93,8 +99,11 @@ namespace Spreadsheet_cwytko
         {
             if(CellDataGridView[e.ColumnIndex, e.RowIndex].Value != null)
                 test.cell[e.ColumnIndex, e.RowIndex].SetText(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.ToString());
-            string msg = String.Format("Finished Editing Cell at ({0}, {1} {2}) {3}",
-                e.ColumnIndex, e.RowIndex, CellDataGridView[e.ColumnIndex, e.RowIndex].Value, test.cell[e.ColumnIndex, e.RowIndex].ReturnText());
+            //CellDataGridView[e.ColumnIndex, e.RowIndex].;
+            CellDataGridView[e.ColumnIndex, e.RowIndex].Value = test.cell[e.ColumnIndex, e.RowIndex].ReturnValue();
+            //CellDataGridView[e.ColumnIndex, e.RowIndex].DataGridView.CancelEdit();
+            string msg = String.Format("Finished Editing Cell at ({0}, {1}): {2} {3}",
+                e.ColumnIndex, e.RowIndex, test.cell[e.ColumnIndex, e.RowIndex].ReturnText(), test.cell[e.ColumnIndex, e.RowIndex].ReturnValue());
             this.Text = msg;
         }
 

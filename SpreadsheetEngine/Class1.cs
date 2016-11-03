@@ -44,6 +44,13 @@ namespace CptS322
             
         }
 
+        protected void SetValue(string evaluation)
+        {
+            //if (_value.CompareTo(evaluation) == 0)
+            //    return;
+            _value = string.Copy(evaluation);
+        }
+
         protected string Text
         {
             get
@@ -62,7 +69,7 @@ namespace CptS322
                     // Can't have this anymore unless the text does not have 
                     // an '
                     //_value = value;
-                    _value = String.Copy(value);
+                    //_value = String.Copy(value);
                 }
                 // Fire the event of the edit
                 OnPropertyChanged("Text");
@@ -111,6 +118,11 @@ namespace CptS322
             Text = String.Copy(n);
         }
 
+        public void NewValue(string eval)
+        {
+            SetValue(eval);
+        }
+
         public string ReturnValue()
         {
             return Value;
@@ -154,32 +166,26 @@ namespace CptS322
                 {
                     cell[i, j] = new SpreadsheetCell(i, j);
                     cell[i, j].PropertyChanged += new PropertyChangedEventHandler(Spreadsheet_PropertyChanged);
-                    cell[i, j].SetText("test");
                 }
             }
         }
 
         private void Spreadsheet_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            int r = (sender as SpreadsheetCell).RowIndex;
-            int c = (sender as SpreadsheetCell).ColumnIndex;
+            //int r = (sender as SpreadsheetCell).RowIndex;
+            //int c = (sender as SpreadsheetCell).ColumnIndex;
 
             if ((sender as SpreadsheetCell).ReturnText().StartsWith("="))
             {
-                // Set the text of a value of another box
+                (sender as SpreadsheetCell).NewValue(new ExpTree((sender as SpreadsheetCell).ReturnText().Substring(1)).Eval().ToString());
 
+                //    // Set the text of a value of another box
+                //    int y = int.Parse((sender as SpreadsheetCell).ReturnText().Substring(2));
+                //    int z = Convert.ToInt32((sender as SpreadsheetCell).ReturnText()[1]) - 65;
 
-                int y = int.Parse((sender as SpreadsheetCell).ReturnText().Substring(2));
-                int z = Convert.ToInt32((sender as SpreadsheetCell).ReturnText()[1]) - 65;
-
-                cell[r, c].SetText(cell[z, y].ReturnText());
-                //cell[(sender as SpreadsheetCell).RowIndex, (sender as SpreadsheetCell).ColumnIndex].SetText();
+                //    cell[r, c].SetText(cell[z, y].ReturnText());
+                //    //cell[(sender as SpreadsheetCell).RowIndex, (sender as SpreadsheetCell).ColumnIndex].SetText();
             }
-            //    else
-            //    {
-            //        (sender as SpreadsheetCell).ReturnText();
-            //        cell[r, c].SetText("no");   
-            //    }
         }
 
         public void testPropChanged()
@@ -259,6 +265,10 @@ namespace CptS322
         Stack<OpNode> joints = new Stack<OpNode>();
         Dictionary<string, double> m_vars = new Dictionary<string, double>();
 
+        public ExpTree(string exp)
+        {
+            Compile(exp);
+        }
 
         public double GetVarValue(string name)
         {
