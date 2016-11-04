@@ -14,7 +14,6 @@ namespace CptS322
 
         // https://msdn.microsoft.com/en-us/library/ms743695(v=vs.110).aspx
         public event PropertyChangedEventHandler PropertyChanged;
-        //public EventArgs e = null;
 
         // I used the link below, copied/pasted the MSDN's version of
         // OnPropertyChanged() and edited to the specs of this assignment
@@ -46,8 +45,6 @@ namespace CptS322
 
         protected void SetValue(string evaluation)
         {
-            //if (_value.CompareTo(evaluation) == 0)
-            //    return;
             _value = string.Copy(evaluation);
         }
 
@@ -59,20 +56,13 @@ namespace CptS322
             }
             set
             {
-                if (value == _text)
+                if (value.Equals(_text))
                     return;
                 else
                 {
-
-                    //_text = value;
-                    _text = String.Copy(value);
-                    // Can't have this anymore unless the text does not have 
-                    // an '
-                    //_value = value;
-                    //_value = String.Copy(value);
+                    _text = (value);
+                    OnPropertyChanged("Text");
                 }
-                // Fire the event of the edit
-                OnPropertyChanged("Text");
             }
 
         }
@@ -115,12 +105,7 @@ namespace CptS322
 
         public void SetText(string n)
         {
-            Text = String.Copy(n);
-        }
-
-        public void NewValue(string eval)
-        {
-            SetValue(eval);
+            Text = n;
         }
 
         public string ReturnValue()
@@ -128,6 +113,10 @@ namespace CptS322
             return Value;
         }
 
+        internal void NewValue(string eval)
+        {
+            SetValue(eval);
+        }
     }
 
     public class Spreadsheet : SpreadsheetCell
@@ -146,11 +135,6 @@ namespace CptS322
             if (r <= CapacityRows && c <= CapacityCols)
                 return cell[r, c];
             return null;
-        }
-
-        public void SetValue(Cell change)
-        {
-            
         }
 
         public Spreadsheet(int NumRows, int NumCols) : base(NumRows, NumCols)
@@ -172,19 +156,14 @@ namespace CptS322
 
         private void Spreadsheet_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            //int r = (sender as SpreadsheetCell).RowIndex;
-            //int c = (sender as SpreadsheetCell).ColumnIndex;
-
             if ((sender as SpreadsheetCell).ReturnText().StartsWith("="))
             {
                 (sender as SpreadsheetCell).NewValue(new ExpTree((sender as SpreadsheetCell).ReturnText().Substring(1)).Eval().ToString());
+            }
 
-                //    // Set the text of a value of another box
-                //    int y = int.Parse((sender as SpreadsheetCell).ReturnText().Substring(2));
-                //    int z = Convert.ToInt32((sender as SpreadsheetCell).ReturnText()[1]) - 65;
-
-                //    cell[r, c].SetText(cell[z, y].ReturnText());
-                //    //cell[(sender as SpreadsheetCell).RowIndex, (sender as SpreadsheetCell).ColumnIndex].SetText();
+            else
+            {
+                (sender as SpreadsheetCell).NewValue((sender as SpreadsheetCell).ReturnText());
             }
         }
 

@@ -15,8 +15,6 @@ namespace Spreadsheet_cwytko
 
     public partial class Form1 : Form
     {
-        //private Button Demo = new Button();
-        private BindingSource CellBindingSource = new BindingSource();
         // this is the UI Layer of the Spreadsheet, where the user enters the
         // formulas and can edit them
         private DataGridView CellDataGridView = new DataGridView();
@@ -38,8 +36,6 @@ namespace Spreadsheet_cwytko
                 CellDataGridView.Columns.Add(c.ToString(), c.ToString());
             }
 
-            CellBindingSource.DataSource = test;
-            // http://stackoverflow.com/questions/29633018/show-2d-array-in-datagridview
             int col = 0;
             for (int r = 0; r < 50; r++)
             {
@@ -48,15 +44,12 @@ namespace Spreadsheet_cwytko
 
                 for (col = 0; col < 26; col++)
                 {
-
-                    //CellDataGridView[col, r].DataGridView.CellContentClick += DataGridView_CellContentClick;
                     CellDataGridView[col, r].DataGridView.CellEndEdit += DataGridView_CellEndEdit;
-                    //CellDataGridView[col, r].DataGridView.Valu
                     CellDataGridView[col, r].DataGridView.CellBeginEdit += DataGridView_CellBeginEdit;
+                    CellDataGridView[col, r].DataGridView.CellLeave += DataGridView_CellLeave;
                     // THIS part took for freaking ever yo, I'm a potato
                     // It seems awfully sloppy but it will be pasta for now
-                    ((CptS322.Spreadsheet)CellBindingSource.DataSource).cell[col, r].PropertyChanged += new PropertyChangedEventHandler(Form1_PropertyChanged);
-
+                    test.cell[col,r].PropertyChanged += new PropertyChangedEventHandler(Form1_PropertyChanged);
                 }
 
                 this.CellDataGridView.Rows.Add(row);
@@ -66,25 +59,33 @@ namespace Spreadsheet_cwytko
             InitializeCellDataGridView();
         }
 
-        // If there was previous text within this sender's text present it so 
-        // the user on CellContent Click...
+        // This is for if the text entered in the cell hasn't changed
+        private void DataGridView_CellLeave(object sender, DataGridViewCellEventArgs e)
+        {
+            CellDataGridView[e.ColumnIndex, e.RowIndex].Value = test.cell[e.ColumnIndex, e.RowIndex].ReturnValue();
+        }
+
         private void DataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             string msg = String.Format("Editing Cell at ({0}, {1}): {2}",
                 e.ColumnIndex, e.RowIndex, test.cell[e.ColumnIndex, e.RowIndex].ReturnText());
             this.Text = msg;
+
             if(test.cell[e.ColumnIndex, e.RowIndex].ReturnText() != null)
                 CellDataGridView[e.ColumnIndex, e.RowIndex].Value = test.cell[e.ColumnIndex, e.RowIndex].ReturnText();
         }
 
+        // this is should handle all displaying event of the data through the
+        // ui
         private void Form1_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            int r = (sender as CptS322.SpreadsheetCell).ColumnIndex;
-            int c = (sender as CptS322.SpreadsheetCell).RowIndex;
-            if ((sender as CptS322.SpreadsheetCell).ReturnText().StartsWith("="))
-                CellDataGridView[c, r].Value = (sender as CptS322.SpreadsheetCell).ReturnValue();
-            else
-                CellDataGridView[c, r].Value = (sender as CptS322.SpreadsheetCell).ReturnText();
+            int c = (sender as CptS322.SpreadsheetCell).ColumnIndex;
+            int r = (sender as CptS322.SpreadsheetCell).RowIndex;
+
+                if ((sender as CptS322.SpreadsheetCell).ReturnText().StartsWith("="))
+                    CellDataGridView[r, c].Value = (sender as CptS322.SpreadsheetCell).ReturnValue();
+
+                else { CellDataGridView[r, c].Value = (sender as CptS322.SpreadsheetCell).ReturnText(); }
         }
 
         private void InitializeCellDataGridView()
@@ -94,33 +95,21 @@ namespace Spreadsheet_cwytko
             CellDataGridView.AllowUserToDeleteRows = false;
         }
 
-        private void DataGridView_CellEndEdit(object sender,
-            DataGridViewCellEventArgs e)
+        private void DataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            if(CellDataGridView[e.ColumnIndex, e.RowIndex].Value != null)
+            if (CellDataGridView[e.ColumnIndex, e.RowIndex].Value != null && !(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.Equals(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue())))
                 test.cell[e.ColumnIndex, e.RowIndex].SetText(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.ToString());
-            //CellDataGridView[e.ColumnIndex, e.RowIndex].;
-            CellDataGridView[e.ColumnIndex, e.RowIndex].Value = test.cell[e.ColumnIndex, e.RowIndex].ReturnValue();
-            //CellDataGridView[e.ColumnIndex, e.RowIndex].DataGridView.CancelEdit();
-            string msg = String.Format("Finished Editing Cell at ({0}, {1}): {2} {3}",
-                e.ColumnIndex, e.RowIndex, test.cell[e.ColumnIndex, e.RowIndex].ReturnText(), test.cell[e.ColumnIndex, e.RowIndex].ReturnValue());
-            this.Text = msg;
         }
 
-        private void Form1_Load_1(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
-            
+
         }
 
         private void Demo_Click(object sender, EventArgs e)
         {
-            // This doesnt seem to be writing to the data layer, only the ui
             test.testPropChanged();
         }
 
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
     }
 }
