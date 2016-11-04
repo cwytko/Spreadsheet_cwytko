@@ -313,6 +313,9 @@ namespace CptS322
                             joints.Push(new OpNode(exp[i]));
                         }
                         break;
+                    // Found a const or a var so parse it, check here if one
+                    // of these is referring to a cell, if so then we need to 
+                    // add this cell 'ref' to the List of m_vars
                     default:
                         int j = i;
                         for (; j < exp.Length; j++)
