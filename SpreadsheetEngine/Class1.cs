@@ -154,6 +154,13 @@ namespace CptS322
             }
         }
 
+        // this is for the dependency tree and reevaluation of dependencies
+        public void reEval(int col, int row)
+        {
+            //(sender as SpreadsheetCell).NewValue(new ExpTree((sender as SpreadsheetCell).ReturnText().Substring(1)).Eval().ToString());
+            cell[col, row].NewValue(new ExpTree(cell[col, row].ReturnText().Substring(1)).Eval().ToString());
+        }
+
         private void Spreadsheet_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if ((sender as SpreadsheetCell).ReturnText().StartsWith("="))
@@ -162,6 +169,9 @@ namespace CptS322
             }
 
             else
+            {
+
+            }
             {
                 (sender as SpreadsheetCell).NewValue((sender as SpreadsheetCell).ReturnText());
             }
@@ -243,6 +253,7 @@ namespace CptS322
         Stack<Node> wood = new Stack<Node>();
         Stack<OpNode> joints = new Stack<OpNode>();
         Dictionary<string, double> m_vars = new Dictionary<string, double>();
+
 
         public ExpTree(string exp)
         {
@@ -326,6 +337,18 @@ namespace CptS322
                         int chosen = 0;
                         if (Int32.TryParse(exp.Substring(i, (j - i)), out chosen))
                             wood.Push(new ConstNode(chosen));
+                        // Here is when we know we have either a cell ref or 
+                        // some gibberish
+                        // If it's a cell ref grab the value, if the value is
+                        // null then we SetVar to 0, but we also need to make 
+                        // sure if there's a change we need to know, so we
+                        // insert what was referenced into a hashset, at any
+                        // point when that cell is edited again we need to 
+                        // run the evaluate again on the cells that rely on the
+                        // cell that was edited
+                        // First use the SetVar function to set the new value 
+                        // of the cell and then recreate the exp tree for the 
+                        // 
                         else
                         {
                             wood.Push(new VarNode(exp.Substring(i, (j - i))));
@@ -338,8 +361,8 @@ namespace CptS322
             while (joints.Count > 0)
                 LinkBranches();
 
-            // There is only one 'branch' left in wood, but everything is attached to it
-            // DA Groot
+            // There is only one 'branch' left in wood, but everything is 
+            //attached to it :: DA Groot
             root = wood.Pop();
         }
 

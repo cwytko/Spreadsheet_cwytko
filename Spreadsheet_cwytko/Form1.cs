@@ -22,12 +22,20 @@ namespace Spreadsheet_cwytko
         // stored
         CptS322.Spreadsheet test = new CptS322.Spreadsheet(26, 50);
 
+        // I need to have the variable that will store the variables' values
+        // out here, the current setup each cell has its own m_vars which is 
+        // not right
+        Dictionary<string, double> cell_vals = new Dictionary<string, double>();
+        char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+        // The hashset stores the dependent coordinates of a given 'key' cell
+        // the 'values' would be the coordinates of othercells that rely on the 
+        // contents of the 'key' cell
+        Dictionary<Tuple<int, int>, List<Tuple<int, int>>> Dependencies = new Dictionary<Tuple<int, int>, List<Tuple<int, int>>>();
+
         public Form1()
         {
-            
             CellDataGridView.Dock = DockStyle.Fill;
             this.Controls.Add(CellDataGridView);
-            char[] alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
             InitializeComponent();
             CellDataGridView.Columns.Clear();
 
@@ -59,7 +67,8 @@ namespace Spreadsheet_cwytko
             InitializeCellDataGridView();
         }
 
-        // This is for if the text entered in the cell hasn't changed
+        // This is for if the text entered in the cell hasn't changed once
+        // focus is left
         private void DataGridView_CellLeave(object sender, DataGridViewCellEventArgs e)
         {
             CellDataGridView[e.ColumnIndex, e.RowIndex].Value = test.cell[e.ColumnIndex, e.RowIndex].ReturnValue();
@@ -97,8 +106,47 @@ namespace Spreadsheet_cwytko
 
         private void DataGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
+
             if (CellDataGridView[e.ColumnIndex, e.RowIndex].Value != null && !(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.Equals(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue())))
                 test.cell[e.ColumnIndex, e.RowIndex].SetText(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.ToString());
+
+            // first we need to see if this cell is new or if this cell already
+            // had a value in the m_vars (cell_vals)
+            string candidate = (alpha[e.ColumnIndex].ToString() + e.RowIndex.ToString());
+            if(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue() != null)
+                cell_vals[candidate] = Double.Parse(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue());
+
+            test.reEval(e.ColumnIndex, e.RowIndex);
+
+            // if new add it with the setvar
+            // else edit the cell 
+            // (this can be done with the same SetVar funtion, I only list this
+            // for clarity's sake
+
+            // after the cell edit I need to check the hashset if there
+            // is a key within the hashset that is the cell's coordinates
+            Tuple<int, int> key = new Tuple<int, int>(e.ColumnIndex, e.RowIndex);
+            if (Dependencies.ContainsKey(key))
+            {
+                // for each entry in the list I need to run the evaluations
+                // again 
+                foreach(Tuple<int, int> dep in Dependencies[key])
+                {
+                    //test.reEval();
+                }
+            }
+
+            // if the cell is in there then run the exptree compilation again
+            // on each cell that is attached to the key cell that was edited
+
+
+            // else add the cell the hashset
+
+            // everytime a cell is edited if it's referencing a cell that is
+            // inside the m_vars get it, else if the var is to a cell and the
+            // var is NOT in the m_vars insert it with a 0 in m_vars
+
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
