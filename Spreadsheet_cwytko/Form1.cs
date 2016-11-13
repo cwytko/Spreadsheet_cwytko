@@ -114,6 +114,8 @@ namespace Spreadsheet_cwytko
             // had a value in the m_vars (cell_vals)
             string candidate = (alpha[e.ColumnIndex].ToString() + e.RowIndex.ToString());
             if(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue() != null)
+                // TODO: null ref sometimes here in an incomplete edit, check
+                // this
                 cell_vals[candidate] = Double.Parse(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue());
 
             //test.reEval(e.ColumnIndex, e.RowIndex);

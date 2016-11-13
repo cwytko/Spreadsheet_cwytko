@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 
 namespace CptS322
 {
+
+
     public abstract class Cell : INotifyPropertyChanged
     {
         // Variables yo
@@ -123,6 +125,8 @@ namespace CptS322
     public class Spreadsheet : SpreadsheetCell
     {
 
+        // this is the data layer area so I'll place the m_vars here
+        public static Dictionary<string, double> m_vars = new Dictionary<string, double>();
         // Lots of cells!
         public SpreadsheetCell[,] cell;
         int CapacityRows, CapacityCols;
@@ -168,8 +172,34 @@ namespace CptS322
             {
                 // I can check for the cells outside here so then I can have
                 // m_vars be inside the scope of the data layer
-                //Regex isAlpha = new Regex(@"[A-Z]{1}(?([0-4]?[0-9]{1})|50)");
-                //isAlpha.IsMatch
+                //([+-/*\ ()]|$)
+                Regex isAlpha = new Regex(@"[A-Z]{1}(([0-4]?[0-9]{1})|50{1})");
+                if (isAlpha.IsMatch((sender as SpreadsheetCell).ReturnText().Substring(1)))
+                {
+                    // I want to get every match so then I can do my cell query
+                    // on each cell reference here and 
+                    // Grab the first match 
+                    Match test = isAlpha.Match((sender as SpreadsheetCell).ReturnText().Substring(1));
+                    // use the m_vars here to insert the value to the cell
+                    m_vars[test.Value] = 0;
+                    int row = 0;
+                    Int32.TryParse(test.Value.Substring(1), out row);
+                    if (cell[(int)test.Value[0] - 65, row - 1].ReturnValue() != null)
+                        m_vars[test.Value] = Double.Parse(cell[(int)test.Value[0] - 65, row - 1].ReturnValue());
+
+                    while (isAlpha.IsMatch((sender as SpreadsheetCell).ReturnText().Substring(1), (test.Index + test.Length)))
+                    {
+                        test = isAlpha.Match((sender as SpreadsheetCell).ReturnText().Substring(1), (test.Index + test.Length));
+                        // use the m_vars here to insert the value to the cell
+                        m_vars[test.Value] = 0;
+                        Int32.TryParse(test.Value.Substring(1), out row);
+                        if (cell[(int)test.Value[0] - 65, row - 1].ReturnValue() != null)
+                            m_vars[test.Value] = Double.Parse(cell[(int)test.Value[0] - 65, row - 1].ReturnValue());
+                    }
+
+
+                    bool here = true;
+                }
                 (sender as SpreadsheetCell).NewValue(new ExpTree((sender as SpreadsheetCell).ReturnText().Substring(1)).Eval().ToString());
             }
 
@@ -254,7 +284,7 @@ namespace CptS322
         public Node root = new Node();
         Stack<Node> wood = new Stack<Node>();
         Stack<OpNode> joints = new Stack<OpNode>();
-        Dictionary<string, double> m_vars = new Dictionary<string, double>();
+        //Dictionary<string, double> m_vars = new Dictionary<string, double>();
 
 
         public ExpTree(string exp)
@@ -264,12 +294,12 @@ namespace CptS322
 
         public double GetVarValue(string name)
         {
-            return m_vars[name];
+            return Spreadsheet.m_vars[name];
         }
 
         public void SetVar(string varName, double varValue)
         {
-            m_vars[varName] = varValue;
+            Spreadsheet.m_vars[varName] = varValue;
         }
 
         int Precedence(char op)
@@ -357,28 +387,28 @@ namespace CptS322
                             // Here check the Substring if it's a cell ref
                             // If so use SetVar and set it to the cell's val
                             // else set the var to 0
-                            Regex isAlpha = new Regex(@"^[A-Z]{1}(?([0-4]?[0-9]{1}$)|50$)");
-                            if(isAlpha.IsMatch(exp.Substring(i, (j - i))))
-                            {
-                                // If we're in here this means are trying to
-                                // reference a real cell in the spreadsheet so
-                                // get its value, if there is no value, then 
-                                // we make the val 0
-                                int ascii = (int)(exp.Substring(i, (j - i)))[0] - 65;
-                                //bool here = true;
-                                int row = new int();
-                                Int32.TryParse(exp.Substring(i, (j - i)).Substring(1), out row);
+                            //Regex isAlpha = new Regex(@"^[A-Z]{1}(?([0-4]?[0-9]{1}$)|50$)");
+                            //if(isAlpha.IsMatch(exp.Substring(i, (j - i))))
+                            //{
+                            //    // If we're in here this means are trying to
+                            //    // reference a real cell in the spreadsheet so
+                            //    // get its value, if there is no value, then 
+                            //    // we make the val 0
+                            //    int ascii = (int)(exp.Substring(i, (j - i)))[0] - 65;
+                            //    //bool here = true;
+                            //    int row = new int();
+                            //    Int32.TryParse(exp.Substring(i, (j - i)).Substring(1), out row);
 
-                                // Now get the see if the value exists
-                                // how to access the spreadsheet here?
-                                // I need to have a function call 
-                                // that checks the particular cell value
+                            //    // Now get the see if the value exists
+                            //    // how to access the spreadsheet here?
+                            //    // I need to have a function call 
+                            //    // that checks the particular cell value
                                 
-                                // how do I access the data layer from here?
+                            //    // how do I access the data layer from here?
 
                                 
-                            }
-                            SetVar(exp.Substring(i, (j - i)), 0);
+                            //}
+                            //SetVar(exp.Substring(i, (j - i)), 0);
                         }
                         i = j - 1;
                         break;
@@ -399,7 +429,7 @@ namespace CptS322
             if (traverse is ConstNode)
                 return (traverse as ConstNode).val;
             else if (traverse is VarNode)
-                return m_vars[(traverse as VarNode).Name];
+                return Spreadsheet.m_vars[(traverse as VarNode).Name];
             else
             {
                 OpNode on = traverse as OpNode;
