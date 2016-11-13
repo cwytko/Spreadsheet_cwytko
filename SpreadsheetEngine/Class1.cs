@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace CptS322
 {
@@ -169,9 +170,6 @@ namespace CptS322
             }
 
             else
-            {
-
-            }
             {
                 (sender as SpreadsheetCell).NewValue((sender as SpreadsheetCell).ReturnText());
             }
@@ -352,6 +350,18 @@ namespace CptS322
                         else
                         {
                             wood.Push(new VarNode(exp.Substring(i, (j - i))));
+                            // Here check the Substring if it's a cell ref
+                            // If so use SetVar and set it to the cell's val
+                            // else set the var to 0
+                            Regex isAlpha = new Regex(@"^[A-Z]{1}(?([0-4]?[0-9]{1}$)|50$)");
+                            if(isAlpha.IsMatch(exp.Substring(i, (j - i))))
+                            {
+                                // If we're in here this means are trying to
+                                // reference a real cell in the spreadsheet so
+                                // get its value, if there is no value, then 
+                                // we make the val 0
+                                bool here = true;
+                            }
                             SetVar(exp.Substring(i, (j - i)), 0);
                         }
                         i = j - 1;

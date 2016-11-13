@@ -116,7 +116,7 @@ namespace Spreadsheet_cwytko
             if(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue() != null)
                 cell_vals[candidate] = Double.Parse(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue());
 
-            test.reEval(e.ColumnIndex, e.RowIndex);
+            //test.reEval(e.ColumnIndex, e.RowIndex);
 
             // if new add it with the setvar
             // else edit the cell 
@@ -128,16 +128,19 @@ namespace Spreadsheet_cwytko
             Tuple<int, int> key = new Tuple<int, int>(e.ColumnIndex, e.RowIndex);
             if (Dependencies.ContainsKey(key))
             {
-                // for each entry in the list I need to run the evaluations
-                // again 
-                foreach(Tuple<int, int> dep in Dependencies[key])
+                // if the cell is in there then run the exp eval again on each
+                // cell that is attached to the key cell that was edited
+                foreach (Tuple<int, int> dep in Dependencies[key])
                 {
-                    //test.reEval();
+                    test.reEval(dep.Item1, dep.Item2);
                 }
             }
 
-            // if the cell is in there then run the exptree compilation again
-            // on each cell that is attached to the key cell that was edited
+            else
+            {
+                Dependencies.Add(key, new List<Tuple<int, int>>());
+            }
+
 
 
             // else add the cell the hashset
