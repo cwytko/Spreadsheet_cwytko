@@ -166,6 +166,10 @@ namespace CptS322
         {
             if ((sender as SpreadsheetCell).ReturnText().StartsWith("="))
             {
+                // I can check for the cells outside here so then I can have
+                // m_vars be inside the scope of the data layer
+                //Regex isAlpha = new Regex(@"[A-Z]{1}(?([0-4]?[0-9]{1})|50)");
+                //isAlpha.IsMatch
                 (sender as SpreadsheetCell).NewValue(new ExpTree((sender as SpreadsheetCell).ReturnText().Substring(1)).Eval().ToString());
             }
 
@@ -360,7 +364,19 @@ namespace CptS322
                                 // reference a real cell in the spreadsheet so
                                 // get its value, if there is no value, then 
                                 // we make the val 0
-                                bool here = true;
+                                int ascii = (int)(exp.Substring(i, (j - i)))[0] - 65;
+                                //bool here = true;
+                                int row = new int();
+                                Int32.TryParse(exp.Substring(i, (j - i)).Substring(1), out row);
+
+                                // Now get the see if the value exists
+                                // how to access the spreadsheet here?
+                                // I need to have a function call 
+                                // that checks the particular cell value
+                                
+                                // how do I access the data layer from here?
+
+                                
                             }
                             SetVar(exp.Substring(i, (j - i)), 0);
                         }
