@@ -67,6 +67,7 @@ namespace Spreadsheet_cwytko
             InitializeCellDataGridView();
         }
 
+
         // This is for if the text entered in the cell hasn't changed once
         // focus is left
         private void DataGridView_CellLeave(object sender, DataGridViewCellEventArgs e)
@@ -109,49 +110,6 @@ namespace Spreadsheet_cwytko
 
             if (CellDataGridView[e.ColumnIndex, e.RowIndex].Value != null && !(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.Equals(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue())))
                 test.cell[e.ColumnIndex, e.RowIndex].SetText(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.ToString());
-
-            // first we need to see if this cell is new or if this cell already
-            // had a value in the m_vars (cell_vals)
-            string candidate = (alpha[e.ColumnIndex].ToString() + e.RowIndex.ToString());
-            if(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue() != null)
-                // TODO: null ref sometimes here in an incomplete edit, check
-                // this
-                cell_vals[candidate] = Double.Parse(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue());
-
-            //test.reEval(e.ColumnIndex, e.RowIndex);
-
-            // if new add it with the setvar
-            // else edit the cell 
-            // (this can be done with the same SetVar funtion, I only list this
-            // for clarity's sake
-
-            // after the cell edit I need to check the hashset if there
-            // is a key within the hashset that is the cell's coordinates
-            Tuple<int, int> key = new Tuple<int, int>(e.ColumnIndex, e.RowIndex);
-            if (Dependencies.ContainsKey(key))
-            {
-                // if the cell is in there then run the exp eval again on each
-                // cell that is attached to the key cell that was edited
-                foreach (Tuple<int, int> dep in Dependencies[key])
-                {
-                    test.reEval(dep.Item1, dep.Item2);
-                }
-            }
-
-            else
-            {
-                Dependencies.Add(key, new List<Tuple<int, int>>());
-            }
-
-
-
-            // else add the cell the hashset
-
-            // everytime a cell is edited if it's referencing a cell that is
-            // inside the m_vars get it, else if the var is to a cell and the
-            // var is NOT in the m_vars insert it with a 0 in m_vars
-
-
         }
 
         private void Form1_Load(object sender, EventArgs e)

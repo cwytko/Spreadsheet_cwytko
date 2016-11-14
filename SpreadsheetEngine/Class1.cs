@@ -30,6 +30,7 @@ namespace CptS322
             }
         }
 
+
         // https://msdn.microsoft.com/en-us/library/acdd6hb7.aspx
         protected Cell(int RowIndex, int ColumnIndex)
         {
@@ -49,6 +50,7 @@ namespace CptS322
         protected void SetValue(string evaluation)
         {
             _value = string.Copy(evaluation);
+            
         }
 
         protected string Text
@@ -93,6 +95,7 @@ namespace CptS322
     {
         int Row;
         int Col;
+        public HashSet<Tuple<int, int>> Deps = new HashSet<Tuple<int, int>>();
 
         public SpreadsheetCell(int CurRow, int CurCol) : base(CurRow, CurCol)
         {
@@ -163,7 +166,8 @@ namespace CptS322
         public void reEval(int col, int row)
         {
             //(sender as SpreadsheetCell).NewValue(new ExpTree((sender as SpreadsheetCell).ReturnText().Substring(1)).Eval().ToString());
-            cell[col, row].NewValue(new ExpTree(cell[col, row].ReturnText().Substring(1)).Eval().ToString());
+            //cell[row, col].NewValue(new ExpTree(cell[row, col].ReturnText().Substring(1)).Eval().ToString());
+            Spreadsheet_PropertyChanged(cell[row, col], null);
         }
 
         private void Spreadsheet_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -172,20 +176,27 @@ namespace CptS322
             {
                 // I can check for the cells outside here so then I can have
                 // m_vars be inside the scope of the data layer
-                //([+-/*\ ()]|$)
+
                 Regex isAlpha = new Regex(@"[A-Z]{1}(([0-4]?[0-9]{1})|50{1})");
                 if (isAlpha.IsMatch((sender as SpreadsheetCell).ReturnText().Substring(1)))
                 {
                     // I want to get every match so then I can do my cell query
                     // on each cell reference here and 
                     // Grab the first match 
+
                     Match test = isAlpha.Match((sender as SpreadsheetCell).ReturnText().Substring(1));
                     // use the m_vars here to insert the value to the cell
                     m_vars[test.Value] = 0;
                     int row = 0;
                     Int32.TryParse(test.Value.Substring(1), out row);
                     if (cell[(int)test.Value[0] - 65, row - 1].ReturnValue() != null)
+                    {
                         m_vars[test.Value] = Double.Parse(cell[(int)test.Value[0] - 65, row - 1].ReturnValue());
+                        // Here the particular cell that is grabbing this value
+                        // also needs to be added to the source cell's list of
+                        // deps
+                        cell[(int)test.Value[0] - 65, row - 1].Deps.Add(new Tuple<int, int>((sender as SpreadsheetCell).ColumnIndex, (sender as SpreadsheetCell).RowIndex));
+                    }
 
                     while (isAlpha.IsMatch((sender as SpreadsheetCell).ReturnText().Substring(1), (test.Index + test.Length)))
                     {
@@ -194,12 +205,13 @@ namespace CptS322
                         m_vars[test.Value] = 0;
                         Int32.TryParse(test.Value.Substring(1), out row);
                         if (cell[(int)test.Value[0] - 65, row - 1].ReturnValue() != null)
+                        {
                             m_vars[test.Value] = Double.Parse(cell[(int)test.Value[0] - 65, row - 1].ReturnValue());
+                            cell[(int)test.Value[0] - 65, row - 1].Deps.Add(new Tuple<int, int>((sender as SpreadsheetCell).ColumnIndex, (sender as SpreadsheetCell).RowIndex));
+                        }
                     }
-
-
-                    bool here = true;
                 }
+
                 (sender as SpreadsheetCell).NewValue(new ExpTree((sender as SpreadsheetCell).ReturnText().Substring(1)).Eval().ToString());
             }
 
@@ -207,6 +219,18 @@ namespace CptS322
             {
                 (sender as SpreadsheetCell).NewValue((sender as SpreadsheetCell).ReturnText());
             }
+
+            // After all the rendering for the particular cell, check if it has
+            // dependencies, if it does for each tuple in its list reeval
+            if((sender as SpreadsheetCell).Deps.Count > 0)
+            {
+                foreach (Tuple<int, int> dep in (sender as SpreadsheetCell).Deps)
+                {
+                    reEval(dep.Item1, dep.Item2);
+                    // How to refresh the cell display?
+                }
+            }
+
         }
 
         public void testPropChanged()
@@ -284,8 +308,6 @@ namespace CptS322
         public Node root = new Node();
         Stack<Node> wood = new Stack<Node>();
         Stack<OpNode> joints = new Stack<OpNode>();
-        //Dictionary<string, double> m_vars = new Dictionary<string, double>();
-
 
         public ExpTree(string exp)
         {
@@ -369,47 +391,8 @@ namespace CptS322
                         int chosen = 0;
                         if (Int32.TryParse(exp.Substring(i, (j - i)), out chosen))
                             wood.Push(new ConstNode(chosen));
-                        // Here is when we know we have either a cell ref or 
-                        // some gibberish
-                        // If it's a cell ref grab the value, if the value is
-                        // null then we SetVar to 0, but we also need to make 
-                        // sure if there's a change we need to know, so we
-                        // insert what was referenced into a hashset, at any
-                        // point when that cell is edited again we need to 
-                        // run the evaluate again on the cells that rely on the
-                        // cell that was edited
-                        // First use the SetVar function to set the new value 
-                        // of the cell and then recreate the exp tree for the 
-                        // 
                         else
-                        {
                             wood.Push(new VarNode(exp.Substring(i, (j - i))));
-                            // Here check the Substring if it's a cell ref
-                            // If so use SetVar and set it to the cell's val
-                            // else set the var to 0
-                            //Regex isAlpha = new Regex(@"^[A-Z]{1}(?([0-4]?[0-9]{1}$)|50$)");
-                            //if(isAlpha.IsMatch(exp.Substring(i, (j - i))))
-                            //{
-                            //    // If we're in here this means are trying to
-                            //    // reference a real cell in the spreadsheet so
-                            //    // get its value, if there is no value, then 
-                            //    // we make the val 0
-                            //    int ascii = (int)(exp.Substring(i, (j - i)))[0] - 65;
-                            //    //bool here = true;
-                            //    int row = new int();
-                            //    Int32.TryParse(exp.Substring(i, (j - i)).Substring(1), out row);
-
-                            //    // Now get the see if the value exists
-                            //    // how to access the spreadsheet here?
-                            //    // I need to have a function call 
-                            //    // that checks the particular cell value
-                                
-                            //    // how do I access the data layer from here?
-
-                                
-                            //}
-                            //SetVar(exp.Substring(i, (j - i)), 0);
-                        }
                         i = j - 1;
                         break;
                 }
