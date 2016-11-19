@@ -222,14 +222,14 @@ namespace CptS322
 
             // After all the rendering for the particular cell, check if it has
             // dependencies, if it does for each tuple in its list reeval
-            if((sender as SpreadsheetCell).Deps.Count > 0)
-            {
+           // if((sender as SpreadsheetCell).Deps.Count > 0)
+            //{
                 foreach (Tuple<int, int> dep in (sender as SpreadsheetCell).Deps)
                 {
                     reEval(dep.Item1, dep.Item2);
                     // How to refresh the cell display?
                 }
-            }
+            //}
 
         }
 

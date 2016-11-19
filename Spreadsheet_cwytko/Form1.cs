@@ -110,6 +110,15 @@ namespace Spreadsheet_cwytko
 
             if (CellDataGridView[e.ColumnIndex, e.RowIndex].Value != null && !(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.Equals(test.cell[e.ColumnIndex, e.RowIndex].ReturnValue())))
                 test.cell[e.ColumnIndex, e.RowIndex].SetText(CellDataGridView[e.ColumnIndex, e.RowIndex].Value.ToString());
+
+            //if(test.cell[e.ColumnIndex, e.RowIndex].Deps.Count > 0)
+            //{
+            foreach (Tuple<int, int> dp in test.cell[e.ColumnIndex, e.RowIndex].Deps)
+            {
+               CellDataGridView[dp.Item2, dp.Item1].Value = test.cell[dp.Item2, dp.Item1].ReturnValue();
+            }
+            //}
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
