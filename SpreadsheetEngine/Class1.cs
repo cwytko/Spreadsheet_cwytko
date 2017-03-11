@@ -89,7 +89,6 @@ namespace CptS322
         }
     }
 
-    // Edification purposes
     // Intermediary step
     public class SpreadsheetCell : Cell
     {
@@ -172,6 +171,8 @@ namespace CptS322
 
         private void Spreadsheet_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            // Need another check for the demo
+
             if ((sender as SpreadsheetCell).ReturnText().StartsWith("="))
             {
                 // I can check for the cells outside here so then I can have
@@ -244,14 +245,14 @@ namespace CptS322
             {
                 cell[(col.Next() % 26), (row.Next() % 50)].SetText("Pickle");
             }
-            for (int i = 0; i < 50; i++)
+            for (int i = 1; i < 50; i++)
             {
                 thing = string.Copy(string.Format("This is cell B{0}", i));
 
                 cell[1, i].SetText(thing);
             }
 
-            for (int i = 0; i < 50; i++)
+            for (int i = 1; i < 50; i++)
             {
                 thing2 = string.Copy(string.Format("=B{0}", i));
                 cell[0, i].SetText(thing2);
@@ -331,7 +332,7 @@ namespace CptS322
             return 0;
         }
 
-        // This helper function is so fucking cool
+        // This helper function is cool
         public void LinkBranches()
         {
             OpNode branch = new OpNode(joints.Pop().OP);

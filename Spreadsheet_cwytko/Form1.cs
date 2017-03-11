@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows.Input;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -131,5 +132,31 @@ namespace Spreadsheet_cwytko
             test.testPropChanged();
         }
 
+       
+        public class RestoreText : ICommand
+        {
+            public event EventHandler CanExecuteChanged;
+
+            public bool CanExecute(object parameter)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Execute(object parameter)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cellToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
