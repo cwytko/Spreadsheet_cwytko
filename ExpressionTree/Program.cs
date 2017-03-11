@@ -98,6 +98,9 @@ namespace ExpressionTree
             {
                 switch (exp[i])
                 {
+                    case ' ':
+                        // Ignore whitespace
+                        break;
                     case '(':
                         joints.Push(new OpNode(exp[i]));
                         break;
@@ -131,7 +134,7 @@ namespace ExpressionTree
                         int j = i;
                         for(; j < exp.Length; j++)
                         {
-                            if (exp[j] == '*' || exp[j] == '+' || exp[j] == '/' || exp[j] == '-' || exp[j] == '(' || exp[j] == ')')
+                            if (exp[j] == '*' || exp[j] == '+' || exp[j] == '/' || exp[j] == '-' || exp[j] == '(' || exp[j] == ')' || exp[j] == ' ')
                                     break;
                         }
                         int chosen = 0;
@@ -261,10 +264,32 @@ namespace ExpressionTree
         static void Main(string[] args)
         {
             ExpTree thing = new ExpTree();
-            thing.Compile("22*(92-2)*(3+4)-(A2/3)");
-            thing.SetVar("A2", 3);
-            Console.WriteLine(thing.Eval());
-            Console.ReadLine();
+            Console.WriteLine("1. Set Var\n2. Write & Evaluate EQU\n3. Quit");
+            while (true)
+            {
+
+                if (Console.ReadLine().Equals("2"))
+                {
+                    Console.WriteLine("Enter the equation:");
+                    thing.Compile(Console.ReadLine());
+                    Console.WriteLine(thing.Eval());
+
+                }
+                else if (Console.ReadLine().Equals("1"))
+                {
+                    String pattern = @"()\s+([=])\s+(\d+)";
+                    Console.WriteLine("Please enter the variable in the following format: var=value");
+
+                }
+                else if (Console.ReadLine().Equals("3"))
+                    break;
+
+
+            }
+            //thing.Compile("22*(92-2)*(3+4)-(A2/3)");
+            //thing.SetVar("A2", 3);
+            //Console.WriteLine(thing.Eval());
+            //Console.ReadLine();
         }
     }
 }
